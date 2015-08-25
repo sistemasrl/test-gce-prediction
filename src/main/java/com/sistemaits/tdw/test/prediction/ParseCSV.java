@@ -70,7 +70,7 @@ public class ParseCSV {
 		});
 	}
 
-	private static String buildRequest(String cloc, GregorianCalendar gc, String direction){
+	public static String buildRequest(String cloc, GregorianCalendar gc, String direction){
 		
 		boolean isFestivo = gc.get(GregorianCalendar.DAY_OF_WEEK) == GregorianCalendar.SUNDAY
 				|| gc.get(GregorianCalendar.DAY_OF_WEEK) == GregorianCalendar.SATURDAY;

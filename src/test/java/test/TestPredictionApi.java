@@ -24,7 +24,10 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.JsonString;
 import com.google.api.client.json.jackson2.JacksonFactory;
+import com.google.api.client.util.Charsets;
+import com.google.api.client.util.Key;
 import com.google.api.client.util.store.DataStoreFactory;
 import com.google.api.client.util.store.FileDataStoreFactory;
 import com.google.api.services.prediction.Prediction;
@@ -32,11 +35,18 @@ import com.google.api.services.prediction.PredictionScopes;
 import com.google.api.services.prediction.model.Input;
 import com.google.api.services.prediction.model.Input.InputInput;
 import com.google.api.services.prediction.model.Output;
+import com.google.common.io.Closeables;
+import com.sistemaits.tdw.test.prediction.ParseCSV;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Collections;
+import java.util.GregorianCalendar;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * @author Yaniv Inbar
@@ -49,8 +59,9 @@ public class TestPredictionApi {
 	 * format is "MyCompany-ProductName/1.0".
 	 */
 	private static final String APPLICATION_NAME = "";
-	static final String MODEL_ID = "languagetest";
-//	static final String STORAGE_DATA_LOCATION = "enter_bucket/language_id.txt";
+	static final String MODEL_ID = "testtdwsanef01";
+	// static final String STORAGE_DATA_LOCATION =
+	// "enter_bucket/language_id.txt";
 
 	/** Directory to store user credentials. */
 	private static final java.io.File DATA_STORE_DIR = new java.io.File(System.getProperty("user.home"),
@@ -70,12 +81,15 @@ public class TestPredictionApi {
 
 	/** Authorizes the installed application to access user's protected data. */
 	private static Credential authorize() throws Exception {
-		// load client secrets		
+		// load client secrets
+		// GoogleClientSecrets clientSecrets =
+		// GoogleClientSecrets.load(JSON_FACTORY,
+		// new
+		// InputStreamReader(TestPredictionApi.class.getResourceAsStream("/client_secret.json")));
+
 		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,
-				new InputStreamReader(TestPredictionApi.class.getResourceAsStream("/client_secret.json")));
-		
-//		GoogleClientSecrets clientSecrets = GoogleClientSecrets.load(JSON_FACTORY,new InputStreamReader(new FileInputStream("client_secret.json")));
-		
+				new InputStreamReader(new FileInputStream("client_secret.json")));
+
 		if (clientSecrets.getDetails().getClientId().startsWith("Enter")
 				|| clientSecrets.getDetails().getClientSecret().startsWith("Enter ")) {
 			System.out.println("Enter Client ID and Secret from https://code.google.com/apis/console/?api=prediction "
@@ -97,10 +111,27 @@ public class TestPredictionApi {
 		Credential credential = authorize();
 		Prediction prediction = new Prediction.Builder(httpTransport, JSON_FACTORY, credential)
 				.setApplicationName(APPLICATION_NAME).build();
-		// train(prediction);
-		predict(prediction, "Is this sentence in English?");
-		predict(prediction, "Â¿Es esta frase en EspaÃ±ol?");
-		predict(prediction, "Est-ce cette phrase en FranÃ§ais?");
+				// train(prediction);
+
+		// 203,"S21_A13_01_115KM4_VA",1309515840000,"182,2011,7,6,1,122400",false,01
+		// 60,"S21_A13_01_115KM4_VA",1309636080000,"183,
+		// 2011,7,7,2,214800",true,01
+		GregorianCalendar cal1 = new GregorianCalendar();
+		cal1.setTimeInMillis(1309515840000l);
+
+		GregorianCalendar cal2 = new GregorianCalendar();
+		cal1.setTimeInMillis(1309636080000l);
+
+		
+		double val = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal1, "1"));
+		System.out.println("Expected 203, predicted"+ val);
+		
+		double val2 = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal2, "2"));
+		System.out.println("Expected 60, predicted"+ val2);
+		
+		// predict(prediction, "Is this sentence in English?");
+		// predict(prediction, "Â¿Es esta frase en EspaÃ±ol?");
+		// predict(prediction, "Est-ce cette phrase en FranÃ§ais?");
 	}
 
 	// private static void train(Prediction prediction) throws IOException {
@@ -152,14 +183,46 @@ public class TestPredictionApi {
 		System.exit(1);
 	}
 
-	private static void predict(Prediction prediction, String text) throws IOException {
+	private static double predict(Prediction prediction, String text) throws IOException {
+		System.out.println("Text: " + text);
+
 		Input input = new Input();
 		InputInput inputInput = new InputInput();
 		inputInput.setCsvInstance(Collections.<Object> singletonList(text));
 		input.setInput(inputInput);
-		Output output = prediction.trainedmodels().predict("sistema-it-01", MODEL_ID, input).execute();
-		System.out.println("Text: " + text);
-		System.out.println("Predicted language: " + output.getOutputLabel());
+
+//		debugLog("com.google.api.client.http");
+
+		// BUG
+		// https://groups.google.com/forum/#!topic/prediction-api-discuss/1gra6obUNig
+		// Output output = prediction.trainedmodels().predict("sistema-it-01",
+		// MODEL_ID, input).execute();
+		// System.out.println("Predicted flow: " + output.getOutputValue());
+
+		double predictedFlow = 0;
+		InputStream is = prediction.trainedmodels().predict("sistema-it-01", MODEL_ID, input).executeAsInputStream();
+		try {
+			JsonFactory jsonFactory = new JacksonFactory();
+			Output2 out2 = jsonFactory.fromInputStream(is, Charsets.UTF_8, Output2.class);
+			predictedFlow = out2.outputValue;
+		} finally {
+			Closeables.closeQuietly(is);
+		}
+		return predictedFlow;
+	}
+
+	public static class Output2 {
+		@Key
+		@JsonString
+		public java.lang.Double outputValue;
+	}
+
+	private static void debugLog(String logger) {
+		Logger googleHttpLogger = Logger.getLogger(logger);
+		googleHttpLogger.setLevel(Level.ALL);
+		ConsoleHandler logHandler = new ConsoleHandler();
+		logHandler.setLevel(Level.ALL);
+		googleHttpLogger.addHandler(logHandler);
 	}
 
 	public static void main(String[] args) {
