@@ -38,6 +38,7 @@ public class Main {
 		if(cmdl.hasOption("build")) {
 			log.info("Building training model and quitting");
 			ParseCSV.parse();
+			System.out.println("Input csv produced");
 			System.exit(0);
 		}
     	
@@ -50,10 +51,6 @@ public class Main {
 		// 60,"S21_A13_01_115KM4_VA",1309636080000,"183,2011,7,7,2,214800",true,01
 		
 		
-		String cloc = cmdl.getOptionValue("cloc");
-		String dirx = cmdl.getOptionValue("dirx");
-		String when = cmdl.getOptionValue("when");
-		String predictionId = cmdl.getOptionValue("id", "testtdwsanef01");
 	}
     
     

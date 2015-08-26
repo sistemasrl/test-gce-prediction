@@ -20,8 +20,6 @@ import com.google.api.client.extensions.jetty.auth.oauth2.LocalServerReceiver;
 import com.google.api.client.googleapis.auth.oauth2.GoogleAuthorizationCodeFlow;
 import com.google.api.client.googleapis.auth.oauth2.GoogleClientSecrets;
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport;
-import com.google.api.client.http.HttpResponse;
-import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.JsonString;
@@ -34,10 +32,7 @@ import com.google.api.services.prediction.Prediction;
 import com.google.api.services.prediction.PredictionScopes;
 import com.google.api.services.prediction.model.Input;
 import com.google.api.services.prediction.model.Input.InputInput;
-import com.google.api.services.prediction.model.Output;
 import com.google.common.io.Closeables;
-import com.sistemaits.tdw.test.prediction.ParseCSV;
-
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -58,8 +53,8 @@ public class TestPredictionApi {
 	 * is {@code null} or blank, the application will log a warning. Suggested
 	 * format is "MyCompany-ProductName/1.0".
 	 */
-	private static final String APPLICATION_NAME = "";
-	static final String MODEL_ID = "testtdwsanef01";
+	private static final String APPLICATION_NAME = "ik";
+	static final String MODEL_ID = "speed_noflow";
 	// static final String STORAGE_DATA_LOCATION =
 	// "enter_bucket/language_id.txt";
 
@@ -123,13 +118,13 @@ public class TestPredictionApi {
 		cal1.setTimeInMillis(1309636080000l);
 
 		
-		double val = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal1, "1"));
-		System.out.println("Expected 203, predicted"+ val);
+//		double val = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal1, "1"));
+//		System.out.println("Expected 203, predicted"+ val);
+//		
+//		double val2 = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal2, "2"));
+//		System.out.println("Expected 60, predicted"+ val2);
 		
-		double val2 = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal2, "2"));
-		System.out.println("Expected 60, predicted"+ val2);
-		
-		// predict(prediction, "Is this sentence in English?");
+		 System.out.println(predict(prediction, "SUMMER SUNDAY,S21_A13_02_115KM4_VA,0"));
 		// predict(prediction, "Â¿Es esta frase en EspaÃ±ol?");
 		// predict(prediction, "Est-ce cette phrase en FranÃ§ais?");
 	}
