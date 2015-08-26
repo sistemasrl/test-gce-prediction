@@ -5,11 +5,27 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoField;
 import java.time.temporal.TemporalField;
+import java.util.Arrays;
 import java.util.GregorianCalendar;
+import java.util.stream.IntStream;
+
+import com.sistemaits.tdw.test.prediction.TIME_TYPE;
 
 public class SimpleTests {
 
-	public static void main(String[] args) throws ParseException {
+	public static void main(String[] args) {
+		
+		IntStream.range(0, 25).forEach(h -> {
+			System.out.println(h + "," + TIME_TYPE.fromLocalDate(h));
+		});
+		
+		for(TIME_TYPE type : TIME_TYPE.values()) {
+			System.out.println(type);
+		}
+		
+	}
+	
+	public static void mainss(String[] args) throws ParseException {
 		String date = "02/02/2010 02:36:00";
 		
 		SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");

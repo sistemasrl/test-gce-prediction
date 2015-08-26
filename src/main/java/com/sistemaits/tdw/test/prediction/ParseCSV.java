@@ -4,8 +4,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.StringJoiner;
 
@@ -14,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 public class ParseCSV {
 
+	/*
     private static final int YYYYMMDD = 0;
     private static final int SECONDS = 1;
     private static final int ID = 2;
@@ -22,8 +26,16 @@ public class ParseCSV {
     private static final int SPEED = 5;
     private static final int Q_TOTAL_VALIDITE = 6;
     private static final int V_TOTAL_VALIDITE = 7;
+    */
+	
+	private static final int HORODATE = 0;
+	private static final int NOM_CPTG = 1;
+	private static final int SENS = 2;
+	private static final int Q_TOTAL = 4;
+	private static final int V_TOTAL = 6;
+	private static final int Q_TOTAL_VALIDITE = 8;
 
-    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyyMMdd");
+    private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void parse() throws Exception {
@@ -35,7 +47,8 @@ public class ParseCSV {
             
             Files.list(Paths.get("./"))
             .filter(path -> {
-                return path.toFile().getName().endsWith(".csv") && !path.toFile().getName().startsWith("out");
+                return path.toFile().getName().endsWith(".csv") 
+                		&& !path.toFile().getName().startsWith("out");
             })
             .map(path -> {
                 ArrayList<String> csv = new ArrayList<>();
@@ -46,18 +59,23 @@ public class ParseCSV {
                     .map(line ->
                         line.replaceAll("\"", "").split(","))
                     .filter(chunks -> {
-                        return chunks[V_TOTAL_VALIDITE].equals("100000") && chunks[Q_TOTAL_VALIDITE].equals("100000");
+                        return //chunks[V_TOTAL_VALIDITE].equals("100000") && 
+                        		chunks[Q_TOTAL_VALIDITE].equals("100000")
+                        		//&& chunks[ID].equals("S21_A13_01_115KM4_VA");
+                        		;
                     })
                     .map(chunks -> {
 
-                        LocalDate localDate = LocalDate.parse(chunks[YYYYMMDD], dtf);
+                        LocalDateTime localDate = LocalDateTime.parse(chunks[HORODATE], dtf);
                         DAY_TYPE dayType = DAY_TYPE.fromLocalDate(localDate);
-
-                        StringJoiner sj = new StringJoiner(",").add(chunks[FLOW])
+                        TIME_TYPE timeType = TIME_TYPE.fromLocalDate(localDate);
+                        StringJoiner sj = new StringJoiner(",")
+                        		.add(chunks[Q_TOTAL])
+                        		//.add("\"" + chunks[ID] + "\"")
                                 .add("\"" + dayType.toString() + "\"")
-                                .add("\"" + chunks[ID] + "\"")
-                                .add(chunks[SECONDS])
-                                //.add(chunks[SPEED])
+                                .add("\"" + timeType.toString() + "\"")
+                                .add(localDate.get(ChronoField.SECOND_OF_DAY)+"")
+                                .add(chunks[V_TOTAL])
                                 ;
 
                         return sj.toString();

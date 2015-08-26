@@ -39,7 +39,7 @@ public class Main {
 		if(cmdl.hasOption("build")) {
 			log.info("Building training model and quitting");
 			ParseCSV.parse();
-			System.out.println("Input csv produced");
+			log.info("Output csv produced");
 			System.exit(0);
 		}
     	
