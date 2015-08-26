@@ -20,6 +20,7 @@ public class Main {
     
     public static void main(String[] args) throws Exception {
 		
+		//SIMO SIMO
     	Options options = new org.apache.commons.cli.Options();
 		options.addOption("build", false, "Merge all SANEF *.csv file in out.csv to train a model");
 		
