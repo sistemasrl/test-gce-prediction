@@ -37,6 +37,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.GregorianCalendar;
 import java.util.logging.ConsoleHandler;
@@ -54,7 +55,7 @@ public class TestPredictionApi {
 	 * format is "MyCompany-ProductName/1.0".
 	 */
 	private static final String APPLICATION_NAME = "ik";
-	static final String MODEL_ID = "speed_noflow";
+	static final String MODEL_ID = "tom-date-time-seconds-speed";
 	// static final String STORAGE_DATA_LOCATION =
 	// "enter_bucket/language_id.txt";
 
@@ -107,7 +108,7 @@ public class TestPredictionApi {
 		Prediction prediction = new Prediction.Builder(httpTransport, JSON_FACTORY, credential)
 				.setApplicationName(APPLICATION_NAME).build();
 				// train(prediction);
-
+		
 		// 203,"S21_A13_01_115KM4_VA",1309515840000,"182,2011,7,6,1,122400",false,01
 		// 60,"S21_A13_01_115KM4_VA",1309636080000,"183,
 		// 2011,7,7,2,214800",true,01
@@ -124,7 +125,7 @@ public class TestPredictionApi {
 //		double val2 = predict(prediction, ParseCSV.buildRequest("S21_A13_01_115KM4_VA", cal2, "2"));
 //		System.out.println("Expected 60, predicted"+ val2);
 		
-		 System.out.println(predict(prediction, "SUMMER SUNDAY,S21_A13_02_115KM4_VA,0"));
+		 System.out.println(predict(prediction, "WINTER_SATURDAY,AFTERNOON,,104"));
 		// predict(prediction, "Â¿Es esta frase en EspaÃ±ol?");
 		// predict(prediction, "Est-ce cette phrase en FranÃ§ais?");
 	}
@@ -183,10 +184,10 @@ public class TestPredictionApi {
 
 		Input input = new Input();
 		InputInput inputInput = new InputInput();
-		inputInput.setCsvInstance(Collections.<Object> singletonList(text));
+		inputInput.setCsvInstance(Arrays.asList(text.split(",")));
 		input.setInput(inputInput);
 
-//		debugLog("com.google.api.client.http");
+		debugLog("com.google.api.client.http");
 
 		// BUG
 		// https://groups.google.com/forum/#!topic/prediction-api-discuss/1gra6obUNig
