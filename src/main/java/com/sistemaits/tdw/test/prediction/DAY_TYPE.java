@@ -59,7 +59,7 @@ public enum DAY_TYPE {
     @Override
     public String toString() {
 
-        return yearPeriod.toString() + " " + weekPeriod.toString();
+        return yearPeriod.toString() + "_" + weekPeriod.toString();
     }
 
     private enum YEAR_PERIOD {

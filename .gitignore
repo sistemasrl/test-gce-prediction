@@ -2,3 +2,14 @@
 /.settings/
 /.classpath
 /.project
+/client_secret.json
+/flow_nospeed.csv
+/model_flux.csv.output
+/model1_flux__S21_A13_01_115KM4_VA.csv.output
+/model1_flux_with_speed.csv.output
+/model2_speed_with_flux.csv.output
+/S21S22S23_0102_clean_validAll_new.csv
+/S21S22S23_0102_clean_validAll_new.xlsx
+/speed_noflow.csv.output
+/speed_noquote.csv.output
+/speed.csv.output

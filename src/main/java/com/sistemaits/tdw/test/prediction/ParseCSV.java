@@ -57,7 +57,7 @@ public class ParseCSV {
                                 .add("\"" + dayType.toString() + "\"")
                                 .add("\"" + chunks[ID] + "\"")
                                 .add(chunks[SECONDS])
-                                //.add(chunks[FLOW])
+                                //.add(chunks[SPEED])
                                 ;
 
                         return sj.toString();
