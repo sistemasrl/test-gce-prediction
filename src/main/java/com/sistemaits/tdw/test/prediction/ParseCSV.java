@@ -1,13 +1,11 @@
 package com.sistemaits.tdw.test.prediction;
 
 import java.io.FileWriter;
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoField;
 import java.util.ArrayList;
 import java.util.StringJoiner;
@@ -33,9 +31,11 @@ public class ParseCSV {
 	private static final int SENS = 2;
 	private static final int Q_TOTAL = 4;
 	private static final int V_TOTAL = 6;
-	private static final int Q_TOTAL_VALIDITE = 8;
+    private static final int Q_TOTAL_VALIDITE = 8;
+    private static final int V_TOTAL_VALIDITE = 10;
 
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+    private static final DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final Logger log = LoggerFactory.getLogger(Main.class);
 
     public static void parse() throws Exception {
@@ -44,6 +44,11 @@ public class ParseCSV {
             FileWriter fw = new FileWriter("out.csv", false);
 
             // Files.list(Paths.get("./")).map(path -> path.toString()).forEach(System.out::println);
+            
+            // add weather
+            
+            if(Files.list(Paths.get("./")).anyMatch(path -> path.toFile().getName().equals("weather.csv")))
+                
             
             Files.list(Paths.get("./"))
             .filter(path -> {
@@ -59,28 +64,50 @@ public class ParseCSV {
                     .map(line ->
                         line.replaceAll("\"", "").split(","))
                     .filter(chunks -> {
+                        LocalDateTime localDateTime = null;
+                        try {
+                            localDateTime=LocalDateTime.parse(chunks[HORODATE], dtf);
+                        }
+                        catch (DateTimeParseException e) {
+                            localDateTime=LocalDateTime.parse(chunks[HORODATE], dtf2);
+                        }
                         return //chunks[V_TOTAL_VALIDITE].equals("100000") && 
-                        		chunks[Q_TOTAL_VALIDITE].equals("100000")
+                                chunks[Q_TOTAL_VALIDITE].startsWith("1")
+                                && chunks[V_TOTAL_VALIDITE].startsWith("1")
+                        		&& localDateTime.getYear() == 2011
+                        		// && chunks[SENS].equals("01")
                         		//&& chunks[ID].equals("S21_A13_01_115KM4_VA");
                         		;
                     })
                     .map(chunks -> {
 
-                        LocalDateTime localDate = LocalDateTime.parse(chunks[HORODATE], dtf);
-                        DAY_TYPE dayType = DAY_TYPE.fromLocalDate(localDate);
-                        TIME_TYPE timeType = TIME_TYPE.fromLocalDate(localDate);
+                        LocalDateTime localDateTime = null;
+                        try {
+                            localDateTime=LocalDateTime.parse(chunks[HORODATE], dtf);
+                        }
+                        catch (DateTimeParseException e) {
+                            localDateTime=LocalDateTime.parse(chunks[HORODATE], dtf2);
+                        }
+                        
+                        // DAY_TYPE dayType = DAY_TYPE.fromLocalDateTime(localDateTime);
+                        // TIME_TYPE timeType = TIME_TYPE.fromLocalDateTime(localDateTIme);
                         StringJoiner sj = new StringJoiner(",")
                         		.add(chunks[Q_TOTAL])
-                        		//.add("\"" + chunks[ID] + "\"")
-                                .add("\"" + dayType.toString() + "\"")
-                                .add("\"" + timeType.toString() + "\"")
-                                .add(localDate.get(ChronoField.SECOND_OF_DAY)+"")
-                                .add(chunks[V_TOTAL])
+                        		//.add("\"" + (chunks[SENS].equals("01") ? "fromParis" : "toParis") + "\"")
+                                .add("\"" + chunks[NOM_CPTG] + "\"")
+                        		//.add("\"" + dayType.toString() + "\"")
+                                .add("\"" + localDateTime.getMonth() + "\"")
+                                .add("\"" + localDateTime.getDayOfWeek() + "\"")
+                                .add("\"" + Utils.getHourTimeSlot(localDateTime) + "\"")
+                                // .add("\"" + timeType.toString() + "\"")
+                                //.add(""+localDateTime.get(ChronoField.SECOND_OF_DAY))
+                                //.add(localDateTIme.get(ChronoField.SECOND_OF_DAY)+"")
+                                // .add(chunks[V_TOTAL])
                                 ;
 
                         return sj.toString();
                     }).forEach(record -> {
-                        writeToFile(fw, record);
+                        Utils.writeToFile(fw, record);
                     });
                 }
                 catch (Exception e) {
@@ -116,14 +143,5 @@ public class ParseCSV {
     
     
     
-    private static void writeToFile(FileWriter fw, String s) {
-
-        try {
-            fw.write(String.format("%s%n", s));
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
 }

@@ -5,6 +5,7 @@ package com.sistemaits.tdw.test.prediction;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.Month;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -40,9 +41,9 @@ public enum DAY_TYPE {
         this.weekPeriod = weekPeriod;
     }
 
-    public static DAY_TYPE fromLocalDate(LocalDateTime localDate){
-        YEAR_PERIOD yp = YEAR_PERIOD.fromLocaDateTime(localDate);
-        WEEK_PERIOD wp = WEEK_PERIOD.fromLocalDateTime(localDate);
+    public static DAY_TYPE fromLocalDateTime(LocalDateTime localDateTime){
+        YEAR_PERIOD yp = YEAR_PERIOD.fromLocalDateTime(localDateTime);
+        WEEK_PERIOD wp = WEEK_PERIOD.fromLocalDateTime(localDateTime);
         if(yp.equals(YEAR_PERIOD.WINTER)){
             if(wp.equals(WEEK_PERIOD.WEEKDAY)) return WINTER_WEEKDAY;
             else if(wp.equals(WEEK_PERIOD.SATURDAY)) return WINTER_SATURDAY;
@@ -52,7 +53,13 @@ public enum DAY_TYPE {
             else if(wp.equals(WEEK_PERIOD.SATURDAY)) return SUMMER_SATURDAY;
             else return SUMMER_SUNDAY;            
         }
+        
     }
+    
+    public static DAY_TYPE fromLocalDate(LocalDate localDate) {
+        return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
+    }
+
     
     /**
      * {@inheritDoc}
@@ -60,7 +67,7 @@ public enum DAY_TYPE {
     @Override
     public String toString() {
 
-        return yearPeriod.toString() + "_" + weekPeriod.toString();
+        return yearPeriod.toString() + " " + weekPeriod.toString();
     }
 
     private enum YEAR_PERIOD {
@@ -73,9 +80,13 @@ public enum DAY_TYPE {
         // private static final List<Month> monthsWinter =
         // new ArrayList<Month>(Arrays.asList(Month.OCTOBER, Month.NOVEMBER, Month.DECEMBER, Month.JANUARY, Month.FEBRUARY, Month.MARCH));
 
-        public static YEAR_PERIOD fromLocaDateTime(LocalDateTime localDate) {
+        public static YEAR_PERIOD fromLocalDateTime(LocalDateTime localDateTime) {
 
-            return monthsSummer.contains(localDate.getMonth()) ? SUMMER : WINTER;
+            return monthsSummer.contains(localDateTime.getMonth()) ? SUMMER : WINTER;
+        }
+        
+        public static YEAR_PERIOD fromLocalDate(LocalDate localDate) {
+            return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
         }
 
     }
@@ -85,9 +96,9 @@ public enum DAY_TYPE {
         SATURDAY,
         SUNDAY;
 
-        public static WEEK_PERIOD fromLocalDateTime(LocalDateTime localDate) {
+        public static WEEK_PERIOD fromLocalDateTime(LocalDateTime localDateTime) {
 
-            switch (localDate.getDayOfWeek()) {
+            switch (localDateTime.getDayOfWeek()) {
             case SATURDAY:
                 return WEEK_PERIOD.SATURDAY;
             case SUNDAY:
@@ -95,6 +106,10 @@ public enum DAY_TYPE {
             default:
                 return WEEK_PERIOD.WEEKDAY;
             }
+        }
+        
+        public static WEEK_PERIOD fromLocalDate(LocalDate localDate) {
+            return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
         }
     }
 

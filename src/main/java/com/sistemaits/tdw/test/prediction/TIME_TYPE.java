@@ -19,8 +19,8 @@ public enum TIME_TYPE {
 //		this.toExclusive = toExclusive;
 	}
 	
-	public static TIME_TYPE fromLocalDate(LocalDateTime localDate){
-		return fromLocalDate(localDate.get(ChronoField.HOUR_OF_DAY));
+	public static TIME_TYPE fromLocalDateTime(LocalDateTime localDateTime){
+		return fromLocalDate(localDateTime.get(ChronoField.HOUR_OF_DAY));
 		
 	}
 
