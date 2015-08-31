@@ -37,6 +37,7 @@ public class ParseCSV {
     private static final DateTimeFormatter dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
     private static final DateTimeFormatter dtf2 = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
     private static final Logger log = LoggerFactory.getLogger(Main.class);
+    private static final int FLOW_RANGE = 140; // veh/h
 
     public static void parse() throws Exception {
 
@@ -47,7 +48,7 @@ public class ParseCSV {
             
             // add weather
             
-            if(Files.list(Paths.get("./")).anyMatch(path -> path.toFile().getName().equals("weather.csv")))
+            // if(Files.list(Paths.get("./")).anyMatch(path -> path.toFile().getName().equals("weather.csv")))
                 
             
             Files.list(Paths.get("./"))
@@ -61,6 +62,7 @@ public class ParseCSV {
 
                 try {
                     Files.lines(path)
+                    .skip(1)
                     .map(line ->
                         line.replaceAll("\"", "").split(","))
                     .filter(chunks -> {
@@ -92,7 +94,8 @@ public class ParseCSV {
                         // DAY_TYPE dayType = DAY_TYPE.fromLocalDateTime(localDateTime);
                         // TIME_TYPE timeType = TIME_TYPE.fromLocalDateTime(localDateTIme);
                         StringJoiner sj = new StringJoiner(",")
-                        		.add(chunks[Q_TOTAL])
+                                //.add(chunks[Q_TOTAL])
+                                .add("\"" + getFlowCategory((Integer.parseInt(chunks[Q_TOTAL])) * 60 / 6) + "\"")
                         		//.add("\"" + (chunks[SENS].equals("01") ? "fromParis" : "toParis") + "\"")
                                 .add("\"" + chunks[NOM_CPTG] + "\"")
                         		//.add("\"" + dayType.toString() + "\"")
@@ -129,19 +132,14 @@ public class ParseCSV {
 
     }
 
-//    public static String buildRequest(String cloc, GregorianCalendar gc, String direction) {
-//
-//        boolean isFestivo = gc.get(GregorianCalendar.DAY_OF_WEEK) == GregorianCalendar.SUNDAY
-//                || gc.get(GregorianCalendar.DAY_OF_WEEK) == GregorianCalendar.SATURDAY;
-//
-//        return new StringJoiner(",").add("\"" + cloc + "\"").add(gc.getTimeInMillis() + "").add("\"" + gc.get(GregorianCalendar.DAY_OF_YEAR) + "")
-//                .add(gc.get(GregorianCalendar.YEAR) + "").add((gc.get(GregorianCalendar.MONTH) + 1) + "")
-//                .add(gc.get(GregorianCalendar.DAY_OF_WEEK) + "").add(gc.get(GregorianCalendar.DAY_OF_MONTH) + "")
-//                .add(inst.format(gc.getTime()) + "\"").add(isFestivo + "").add(direction).toString();
-//    }
+    
+    private static String getFlowCategory(int flow) {
 
-    
-    
-    
+        int r = flow / FLOW_RANGE;
+        int min = r*FLOW_RANGE;
+        return "" + min + "_" + (min + FLOW_RANGE);
+    }
 
+
+        
 }

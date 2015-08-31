@@ -147,7 +147,7 @@ public class TestPredictionApi {
      * 
      * @throws Exception
      */
-    public static void bulkTest(String requestFileName, String model, int limit, boolean random) throws Exception {
+    public static void bulkTest(String requestFileName, String model, MODEL_TYPE modelType, int limit, boolean random) throws Exception {
 
         File f = new File(requestFileName);
         if (!f.exists() && !f.getName().endsWith(".csv"))
@@ -158,6 +158,7 @@ public class TestPredictionApi {
 
         System.out.println("------------- BULK TEST -------------");
         System.out.println("Model: " + model);
+        System.out.println("Model Type: " + modelType);
         System.out.println("Input request file: " + f.getAbsolutePath());
         System.out.println("Running bulk test...");
 
@@ -175,6 +176,8 @@ public class TestPredictionApi {
             lines = lines.subList(0, maxIndex);
         }
 
+        System.out.println("Start test");
+
         long start=System.nanoTime();
         
         final long nRow = lines.size();
@@ -185,10 +188,10 @@ public class TestPredictionApi {
             String request = Arrays.asList(chunks).stream().skip(1).collect(Collectors.joining(","));
             Object result = null;
             try {
-                result = predict(prediction, request, model);
+                result = predict(prediction, request, model, modelType);
             }
             catch (Exception e) {
-                // e.printStackTrace();
+                e.printStackTrace();
                 errorCounter.incrementAndGet();
                 return null;
             }
@@ -227,10 +230,10 @@ public class TestPredictionApi {
 
     private static Object predict(Prediction prediction, String text) throws IOException {
 
-        return predict(prediction, MODEL_ID, text);
+        return predict(prediction, MODEL_ID, text, MODEL_TYPE.NUMERIC);
     }
 
-    private static Object predict(Prediction prediction, String text, String modelId) throws IOException {
+    private static Object predict(Prediction prediction, String text, String modelId, MODEL_TYPE modelType) throws IOException {
         // System.out.println("Text: " + text);
 
         Input input = new Input();
@@ -246,24 +249,43 @@ public class TestPredictionApi {
         // MODEL_ID, input).execute();
         // System.out.println("Predicted flow: " + output.getOutputValue());
 
-        double predictedFlow = 0;
+        Object predictedValue = null;
         InputStream is = prediction.trainedmodels().predict("sistema-it-01", modelId, input).executeAsInputStream();
         try {
             JsonFactory jsonFactory = new JacksonFactory();
-            Output2 out2 = jsonFactory.fromInputStream(is, Charsets.UTF_8, Output2.class);
-            predictedFlow = out2.outputValue;
+            switch (modelType) {
+            case NUMERIC:
+                OutputNumber outNumeric = jsonFactory.fromInputStream(is, Charsets.UTF_8, OutputNumber.class);
+                predictedValue = outNumeric.outputValue;                
+                break;
+
+            default:
+                OutputString outString = jsonFactory.fromInputStream(is, Charsets.UTF_8, OutputString.class);
+                predictedValue = outString.outputLabel;                
+                break;
+            }
+        }catch(Exception e){
+            e.printStackTrace();
         }
         finally {
             Closeables.closeQuietly(is);
         }
-        return predictedFlow;
+        return predictedValue;
     }
 
-    public static class Output2 {
+    public static class OutputNumber {
 
         @Key
         @JsonString
         public java.lang.Double outputValue;
+    }
+    
+
+    public static class OutputString {
+
+        @Key
+        @JsonString
+        public String outputLabel;
     }
 
     private static void debugLog(String logger) {
