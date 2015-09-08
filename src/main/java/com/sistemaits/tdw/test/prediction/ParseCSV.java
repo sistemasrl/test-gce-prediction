@@ -91,22 +91,31 @@ public class ParseCSV {
                             localDateTime=LocalDateTime.parse(chunks[HORODATE], dtf2);
                         }
                         
-                        // DAY_TYPE dayType = DAY_TYPE.fromLocalDateTime(localDateTime);
+                        DAY_TYPE dayType = DAY_TYPE.fromLocalDateTime(localDateTime);
                         // TIME_TYPE timeType = TIME_TYPE.fromLocalDateTime(localDateTIme);
-                        StringJoiner sj = new StringJoiner(",")
-                                //.add(chunks[Q_TOTAL])
-                                .add("\"" + getFlowCategory((Integer.parseInt(chunks[Q_TOTAL])) * 60 / 6) + "\"")
-                        		//.add("\"" + (chunks[SENS].equals("01") ? "fromParis" : "toParis") + "\"")
-                                .add("\"" + chunks[NOM_CPTG] + "\"")
-                        		//.add("\"" + dayType.toString() + "\"")
-                                .add("\"" + localDateTime.getMonth() + "\"")
-                                .add("\"" + localDateTime.getDayOfWeek() + "\"")
-                                .add("\"" + Utils.getHourTimeSlot(localDateTime) + "\"")
-                                // .add("\"" + timeType.toString() + "\"")
-                                //.add(""+localDateTime.get(ChronoField.SECOND_OF_DAY))
-                                //.add(localDateTIme.get(ChronoField.SECOND_OF_DAY)+"")
-                                // .add(chunks[V_TOTAL])
-                                ;
+                        StringJoiner sj = null;
+                        try {
+                            sj = new StringJoiner(",")
+                                    //.add(chunks[Q_TOTAL])
+                                    .add("\"" + (Integer.parseInt(chunks[Q_TOTAL]) * 60 / 6) + "\"")
+                            		//.add("\"" + (chunks[SENS].equals("01") ? "fromParis" : "toParis") + "\"")
+                                    .add("\"" + chunks[NOM_CPTG] + "\"")
+                            		//.add("\"" + dayType.toString() + "\"")
+                                    //.add("\"" + dayType.getYearPeriod() + "\"")
+                                    .add("\"" + localDateTime.getMonth() + "\"")
+                                    .add("\"" + localDateTime.getDayOfWeek() + "\"")
+                                    .add("\"" + Utils.getHourTimeSlot(localDateTime) + "\"")
+                                    .add("\"" + HolidaysManager.isHoliday(localDateTime) + "\"")
+                                    //.add("\"" + localDateTime.toLocalDate() + "\"")
+                                    // .add("\"" + timeType.toString() + "\"")
+                                    //.add(""+localDateTime.get(ChronoField.SECOND_OF_DAY))
+                                    //.add(localDateTIme.get(ChronoField.SECOND_OF_DAY)+"")
+                                    // .add(chunks[V_TOTAL])
+                                    ;
+                        }
+                        catch (Exception e) {
+                            e.printStackTrace();
+                        }
 
                         return sj.toString();
                     }).forEach(record -> {

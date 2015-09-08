@@ -41,26 +41,50 @@ public enum DAY_TYPE {
         this.weekPeriod = weekPeriod;
     }
 
-    public static DAY_TYPE fromLocalDateTime(LocalDateTime localDateTime){
+    public static DAY_TYPE fromLocalDateTime(LocalDateTime localDateTime) {
+
         YEAR_PERIOD yp = YEAR_PERIOD.fromLocalDateTime(localDateTime);
         WEEK_PERIOD wp = WEEK_PERIOD.fromLocalDateTime(localDateTime);
-        if(yp.equals(YEAR_PERIOD.WINTER)){
-            if(wp.equals(WEEK_PERIOD.WEEKDAY)) return WINTER_WEEKDAY;
-            else if(wp.equals(WEEK_PERIOD.SATURDAY)) return WINTER_SATURDAY;
-            else return WINTER_SUNDAY;
-        }else{
-            if(wp.equals(WEEK_PERIOD.WEEKDAY)) return SUMMER_WEEKDAY;
-            else if(wp.equals(WEEK_PERIOD.SATURDAY)) return SUMMER_SATURDAY;
-            else return SUMMER_SUNDAY;            
+        if (yp.equals(YEAR_PERIOD.WINTER)) {
+            if (wp.equals(WEEK_PERIOD.WEEKDAY))
+                return WINTER_WEEKDAY;
+            else if (wp.equals(WEEK_PERIOD.SATURDAY))
+                return WINTER_SATURDAY;
+            else
+                return WINTER_SUNDAY;
         }
-        
+        else {
+            if (wp.equals(WEEK_PERIOD.WEEKDAY))
+                return SUMMER_WEEKDAY;
+            else if (wp.equals(WEEK_PERIOD.SATURDAY))
+                return SUMMER_SATURDAY;
+            else
+                return SUMMER_SUNDAY;
+        }
+
     }
-    
+
     public static DAY_TYPE fromLocalDate(LocalDate localDate) {
+
         return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
     }
 
-    
+    /**
+     * @return the yearPeriod
+     */
+    public YEAR_PERIOD getYearPeriod() {
+
+        return yearPeriod;
+    }
+
+    /**
+     * @return the weekPeriod
+     */
+    public WEEK_PERIOD getWeekPeriod() {
+
+        return weekPeriod;
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -70,7 +94,7 @@ public enum DAY_TYPE {
         return yearPeriod.toString() + " " + weekPeriod.toString();
     }
 
-    private enum YEAR_PERIOD {
+    public enum YEAR_PERIOD {
         WINTER,
         SUMMER;
 
@@ -84,14 +108,15 @@ public enum DAY_TYPE {
 
             return monthsSummer.contains(localDateTime.getMonth()) ? SUMMER : WINTER;
         }
-        
+
         public static YEAR_PERIOD fromLocalDate(LocalDate localDate) {
+
             return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
         }
 
     }
 
-    private enum WEEK_PERIOD {
+    public enum WEEK_PERIOD {
         WEEKDAY,
         SATURDAY,
         SUNDAY;
@@ -107,8 +132,9 @@ public enum DAY_TYPE {
                 return WEEK_PERIOD.WEEKDAY;
             }
         }
-        
+
         public static WEEK_PERIOD fromLocalDate(LocalDate localDate) {
+
             return fromLocalDateTime(LocalDateTime.of(localDate, LocalTime.ofSecondOfDay(0)));
         }
     }
